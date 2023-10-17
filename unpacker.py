@@ -6,12 +6,11 @@ import os
 from util import *
 
 class Unpacker:
-    def __init__(self, fw_path, des_key = '0123456789ABCDEF'.decode('hex'), fw_name='T91_4.bin'):
+    def __init__(self, fw_path, des_key = '0123456789ABCDEF'.decode('hex')):
         self.des_key = des_key
         self.fw_f = open(fw_path, 'rb')
         self.header = DES.new(self.des_key, DES.MODE_ECB).decrypt(self.fw_f.read(0x100000))
-        if fw_name is None: fw_name = os.path.basename(fw_path)
-        self.fw_name = fw_name
+        self.fw_name = os.path.basename(fw_path)
         self.load()
 
     def load(self):
@@ -19,12 +18,9 @@ class Unpacker:
         self.bin_num = strange_bytes_to_int(header[1608:1608+4])
         self.cfg_cnt = strange_bytes_to_int(header[1088:1088+4])
         self.bin_cnt = strange_bytes_to_int(header[1092:1092+4])
-        if self.bin_num == 1:
-                self.phone_version = get_c_str(header, 64)
-                self.packer_version = get_c_str(header, 0)
-                self.img_version = get_c_str(header, 576)
-        else:
-            raise Exception("error:bin num %d don't support\n", bin_num)
+        self.phone_version = get_c_str(header, 64)
+        self.packer_version = get_c_str(header, 0)
+        self.img_version = get_c_str(header, 576)
 
 
     def export(self, path, unpack_files=True, crc_check = True):
